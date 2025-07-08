@@ -837,10 +837,11 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getDatabase, ref, push, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
 
-        // Your web app's Firebase configuration
+        // Your web app's Firebase configuration - UPDATED WITH databaseURL
         const firebaseConfig = {
             apiKey: "AIzaSyA_hMtH-ZZvPHc8rGIau9NcjmMBuuCMkLg",
             authDomain: "gptai-d5dcb.firebaseapp.com",
+            databaseURL: "https://gptai-d5dcb-default-rtdb.asia-southeast1.firebasedatabase.app", // THIS IS THE NEW LINE!
             projectId: "gptai-d5dcb",
             storageBucket: "gptai-d5dcb.firebasestorage.app",
             messagingSenderId: "851554123983",
@@ -939,17 +940,33 @@
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetSectionId = e.target.closest('a').dataset.section + '-section';
+                const clickedLink = e.target.closest('a');
+                if (!clickedLink) {
+                    showNotification('ข้อผิดพลาด: ไม่พบลิงก์ที่คลิก', 'error', 3000);
+                    return;
+                }
+                const targetSectionId = clickedLink.dataset.section + '-section';
+                showNotification(`คลิกแท็บ: ${clickedLink.textContent.trim()}, เป้าหมาย: ${targetSectionId}`, 'info', 2000);
 
                 // Remove active from all nav links
                 navLinks.forEach(nav => nav.classList.remove('active'));
-                // Add active to clicked link (use closest('a') in case icon is clicked)
-                e.target.closest('a').classList.add('active');
+                // Add active to clicked link
+                clickedLink.classList.add('active');
 
                 // Hide all content sections
-                contentSections.forEach(section => section.classList.remove('active'));
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                    showNotification(`ซ่อนส่วน: ${section.id}`, 'info', 1000);
+                });
                 // Show the target section
-                document.getElementById(targetSectionId).classList.add('active');
+                const targetSection = document.getElementById(targetSectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    showNotification(`แสดงส่วน: ${targetSectionId}`, 'success', 1000);
+                } else {
+                    showNotification(`ข้อผิดพลาด: ไม่พบส่วน ${targetSectionId}`, 'error', 3000);
+                }
+
 
                 // Reload data for the active section if needed
                 if (targetSectionId === 'dashboard-section') {
@@ -959,8 +976,7 @@
                 } else if (targetSectionId === 'categories-section') {
                     loadCategories();
                 } else if (targetSectionId === 'reports-section') {
-                    // Initial report generation if needed, or wait for button click
-                    generateReport(); // Generate default monthly report
+                    generateReport();
                 }
             });
         });
@@ -1167,37 +1183,56 @@
 
         categoryForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            showNotification('ขั้นตอน 1: ฟอร์มถูกส่ง, กำลังประมวลผล...', 'info', 3000);
 
             const id = categoryIdInput.value;
             const name = categoryNameInput.value;
             const icon = categoryIconInput.value;
             const color = categoryColorInput.value;
 
-            console.log("Attempting to save category:", { id, name, icon, color });
+            // Log data being prepared
+            console.log("Category data prepared:", { id, name, icon, color });
+            showNotification('ขั้นตอน 2: ข้อมูลหมวดหมู่ถูกเตรียมแล้ว...', 'info', 3000);
+
+            // Disable button and show loading state
+            const submitBtn = categoryForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "กำลังบันทึก...";
+            showNotification('ขั้นตอน 3: กำลังพยายามบันทึกไปยัง Firebase...', 'info', 5000);
 
             if (id) {
                 // Update existing category
                 set(ref(database, `categories/${id}`), { name, icon, color })
                     .then(() => {
-                        showNotification('หมวดหมู่อัปเดตเรียบร้อย!', 'success');
+                        showNotification('ขั้นตอน 4: หมวดหมู่อัปเดตเรียบร้อย! (Firebase OK)', 'success', 7000);
                         closeModal('category-modal');
                         console.log("Category updated successfully!");
                     })
                     .catch(error => {
-                        showNotification(`เกิดข้อผิดพลาดในการอัปเดตหมวดหมู่: ${error.message}`, 'error');
+                        showNotification(`ข้อผิดพลาด (อัปเดต): ${error.message}`, 'error', 15000);
                         console.error("Error updating category:", error);
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "บันทึกหมวดหมู่";
+                        showNotification('การดำเนินการบันทึกเสร็จสิ้น.', 'info', 3000);
                     });
             } else {
                 // Add new category
                 push(categoriesRef, { name, icon, color })
                     .then(() => {
-                        showNotification('เพิ่มหมวดหมู่เรียบร้อย!', 'success');
+                        showNotification('ขั้นตอน 4: เพิ่มหมวดหมู่เรียบร้อย! (Firebase OK)', 'success', 7000);
                         closeModal('category-modal');
                         console.log("Category added successfully!");
                     })
                     .catch(error => {
-                        showNotification(`เกิดข้อผิดพลาดในการเพิ่มหมวดหมู่: ${error.message}`, 'error');
+                        showNotification(`ข้อผิดพลาด (เพิ่ม): ${error.message}`, 'error', 15000);
                         console.error("Error adding category:", error);
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = "บันทึกหมวดหมู่";
+                        showNotification('การดำเนินการบันทึกเสร็จสิ้น.', 'info', 3000);
                     });
             }
         });
@@ -1554,8 +1589,19 @@
             const ws_data = [
                 ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวน"]
             ];
-            .forEach(t => {
-                const categoryName = allCategories[t.category] ? allCateg
+            transactions.forEach(t => {
+                const categoryName = allCategories[t.category] ? allCategories[t.category].name : 'Unknown';
+                ws_data.push([
+                    t.date,
+                    t.type === 'income' ? 'รายรับ' : 'รายจ่าย',
+                    categoryName,
+                    t.description || '',
+                    t.amount
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "รายงานการเงิน");
 
             XLSX.writeFile(wb, "MooFinance_Report.xlsx");
