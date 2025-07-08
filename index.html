@@ -1554,19 +1554,8 @@
             const ws_data = [
                 ["วันที่", "ประเภท", "หมวดหมู่", "รายละเอียด", "จำนวน"]
             ];
-            transactions.forEach(t => {
-                const categoryName = allCategories[t.category] ? allCategories[t.category].name : 'Unknown';
-                ws_data.push([
-                    t.date,
-                    t.type === 'income' ? 'รายรับ' : 'รายจ่าย',
-                    categoryName,
-                    t.description || '',
-                    t.amount
-                ]);
-            });
-
-            const ws = XLSX.utils.aoa_to_sheet(ws_data);
-            const wb = XLSX.utils.book_new();
+            .forEach(t => {
+                const categoryName = allCategories[t.category] ? allCateg
             XLSX.utils.book_append_sheet(wb, ws, "รายงานการเงิน");
 
             XLSX.writeFile(wb, "MooFinance_Report.xlsx");
