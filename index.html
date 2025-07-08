@@ -605,165 +605,298 @@
             }
         }
 
+        /* Login/Logout UI specific styles */
+        .auth-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh; /* Take most of the screen height */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 35px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid var(--border-light);
+        }
+
+        .auth-card h2 {
+            color: var(--primary-mint);
+            margin-bottom: 25px;
+            font-size: 1.8em;
+        }
+
+        .auth-card .form-group {
+            margin-bottom: 18px;
+        }
+
+        .auth-card input[type="email"],
+        .auth-card input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .auth-card .btn {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .auth-card .toggle-auth-mode {
+            background: none;
+            border: none;
+            color: var(--primary-mint);
+            font-size: 0.9em;
+            margin-top: 15px;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+        .auth-card .toggle-auth-mode:hover {
+            color: var(--dark-mint);
+        }
+
+        .user-status {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: var(--primary-mint);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 200, 151, 0.3);
+            z-index: 101; /* Above navbar */
+        }
+        .user-status.logged-out {
+            background-color: var(--text-medium);
+        }
+        .user-status button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 0.9em;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s ease;
+            box-shadow: none; /* Remove button shadow */
+        }
+        .user-status button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Hide main app content when not logged in */
+        #main-app-content {
+            display: none;
+            width: 100%;
+            flex-grow: 1; /* Allow content to fill space */
+        }
+        #main-app-content.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
 
-    <header class="navbar">
-        <nav>
-            <ul>
-                <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-home"></i> บัญชีการเงิน</a></li>
-                <li><a href="#" data-section="transactions"><i class="fas fa-exchange-alt"></i> ธุรกรรม</a></li>
-                <li><a href="#" data-section="categories"><i class="fas fa-tags"></i> หมวดหมู่</a></li>
-                <li><a href="#" data-section="reports"><i class="fas fa-chart-pie"></i> รายงาน</a></li>
-            </ul>
-        </nav>
-    </header>
+    <div id="user-status" class="user-status logged-out">
+        <span id="auth-status-text">ไม่ได้เข้าสู่ระบบ</span>
+        <button id="auth-button">เข้าสู่ระบบ</button>
+    </div>
 
-    <div class="container">
-        <!-- Dashboard Section -->
-        <section id="dashboard-section" class="content-section active">
-            <h2 class="header">บัญชีการเงิน</h2>
-            <div class="dashboard-grid">
-                <div class="app-card dashboard-card balance">
-                    <h3>ยอดคงเหลือ</h3>
-                    <div class="amount" id="balance-amount">฿0</div>
+    <!-- Login/Register Section -->
+    <section id="auth-section" class="auth-section active">
+        <div class="app-card auth-card">
+            <h2 id="auth-mode-title">เข้าสู่ระบบ</h2>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="auth-email">อีเมล:</label>
+                    <input type="email" id="auth-email" placeholder="you@example.com" required>
                 </div>
-                <div class="app-card dashboard-card income">
-                    <h3>รายรับเดือนนี้</h3>
-                    <div class="amount" id="monthly-income">฿0</div>
+                <div class="form-group">
+                    <label for="auth-password">รหัสผ่าน:</label>
+                    <input type="password" id="auth-password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)" required>
                 </div>
-                <div class="app-card dashboard-card expense">
-                    <h3>รายจ่ายเดือนนี้</h3>
-                    <div class="amount" id="monthly-expense">฿0</div>
-                </div>
-            </div>
-            <button class="quick-add-btn" id="quick-add-transaction-btn"><i class="fas fa-plus"></i> เพิ่มธุรกรรมด่วน</button>
-        </section>
+                <button type="submit" class="btn" id="auth-submit-btn">เข้าสู่ระบบ</button>
+                <button type="button" class="toggle-auth-mode" id="toggle-auth-mode-btn">ยังไม่มีบัญชี? ลงทะเบียนที่นี่</button>
+            </form>
+        </div>
+    </section>
 
-        <!-- Transactions Section -->
-        <section id="transactions-section" class="content-section">
-            <h2 class="header">จัดการธุรกรรม</h2>
-            <div class="app-card">
-                <button class="btn" id="add-transaction-btn"><i class="fas fa-plus"></i> เพิ่มธุรกรรมใหม่</button>
-                <div class="report-filters" style="margin-top: 20px;">
-                    <div class="form-group">
-                        <label for="filter-type">ประเภท</label>
-                        <select id="filter-type">
-                            <option value="">ทั้งหมด</option>
-                            <option value="income">รายรับ</option>
-                            <option value="expense">รายจ่าย</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filter-category">หมวดหมู่</label>
-                        <select id="filter-category">
-                            <option value="">ทั้งหมด</option>
-                            <!-- Categories will be loaded here by JS -->
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="filter-start-date">จากวันที่</label>
-                        <input type="date" id="filter-start-date">
-                    </div>
-                    <div class="form-group">
-                        <label for="filter-end-date">ถึงวันที่</label>
-                        <input type="date" id="filter-end-date">
-                    </div>
-                    <button class="btn" id="apply-transaction-filter">กรอง</button>
-                </div>
+    <!-- Main App Content (Hidden by default, shown after login) -->
+    <div id="main-app-content">
+        <header class="navbar">
+            <nav>
+                <ul>
+                    <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-home"></i> บัญชีการเงิน</a></li>
+                    <li><a href="#" data-section="transactions"><i class="fas fa-exchange-alt"></i> ธุรกรรม</a></li>
+                    <li><a href="#" data-section="categories"><i class="fas fa-tags"></i> หมวดหมู่</a></li>
+                    <li><a href="#" data-section="reports"><i class="fas fa-chart-pie"></i> รายงาน</a></li>
+                </ul>
+            </nav>
+        </header>
 
-                <h3>รายการธุรกรรม</h3>
-                <div style="overflow-x: auto;">
-                    <table id="transactions-table">
-                        <thead>
-                            <tr>
-                                <th>วันที่</th>
-                                <th>ประเภท</th>
-                                <th>หมวดหมู่</th>
-                                <th>รายละเอียด</th>
-                                <th>จำนวน</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Transactions will be loaded here by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Categories Section -->
-        <section id="categories-section" class="content-section">
-            <h2 class="header">จัดการหมวดหมู่</h2>
-            <div class="app-card">
-                <button class="btn" id="add-category-btn"><i class="fas fa-tags"></i> เพิ่มหมวดหมู่ใหม่</button>
-                <h3>รายการหมวดหมู่</h3>
-                <div style="overflow-x: auto;">
-                    <table id="categories-table">
-                        <thead>
-                            <tr>
-                                <th>ชื่อหมวดหมู่</th>
-                                <th>ไอคอน</th>
-                                <th>สี</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Categories will be loaded here by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Reports Section -->
-        <section id="reports-section" class="content-section">
-            <h2 class="header">รายงานและแผนภูมิ</h2>
-            <div class="app-card">
-                <div class="report-filters">
-                    <div class="form-group">
-                        <label for="report-period-type">ประเภทรายงาน</label>
-                        <select id="report-period-type">
-                            <option value="monthly">รายเดือน</option>
-                            <option value="yearly">รายปี</option>
-                            <option value="custom">กำหนดเอง</option>
-                        </select>
+        <div class="container">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="content-section active">
+                <h2 class="header">บัญชีการเงิน</h2>
+                <div class="dashboard-grid">
+                    <div class="app-card dashboard-card balance">
+                        <h3>ยอดคงเหลือ</h3>
+                        <div class="amount" id="balance-amount">฿0</div>
                     </div>
-                    <div class="form-group" id="report-month-year-group">
-                        <label for="report-month-year">เดือน/ปี</label>
-                        <input type="month" id="report-month-year">
+                    <div class="app-card dashboard-card income">
+                        <h3>รายรับเดือนนี้</h3>
+                        <div class="amount" id="monthly-income">฿0</div>
                     </div>
-                     <div class="form-group" id="report-year-group" style="display: none;">
-                        <label for="report-year">ปี</label>
-                        <input type="number" id="report-year" min="2000" max="2100" value="2024">
+                    <div class="app-card dashboard-card expense">
+                        <h3>รายจ่ายเดือนนี้</h3>
+                        <div class="amount" id="monthly-expense">฿0</div>
                     </div>
-                    <div class="form-group" id="report-custom-date-group" style="display: none;">
-                        <label for="report-start-date">จากวันที่</label>
-                        <input type="date" id="report-start-date">
-                        <label for="report-end-date">ถึงวันที่</label>
-                        <input type="date" id="report-end-date">
+                </div>
+                <button class="quick-add-btn" id="quick-add-transaction-btn"><i class="fas fa-plus"></i> เพิ่มธุรกรรมด่วน</button>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions-section" class="content-section">
+                <h2 class="header">จัดการธุรกรรม</h2>
+                <div class="app-card">
+                    <button class="btn" id="add-transaction-btn"><i class="fas fa-plus"></i> เพิ่มธุรกรรมใหม่</button>
+                    <div class="report-filters" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label for="filter-type">ประเภท</label>
+                            <select id="filter-type">
+                                <option value="">ทั้งหมด</option>
+                                <option value="income">รายรับ</option>
+                                <option value="expense">รายจ่าย</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-category">หมวดหมู่</label>
+                            <select id="filter-category">
+                                <option value="">ทั้งหมด</option>
+                                <!-- Categories will be loaded here by JS -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-start-date">จากวันที่</label>
+                            <input type="date" id="filter-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-end-date">ถึงวันที่</label>
+                            <input type="date" id="filter-end-date">
+                        </div>
+                        <button class="btn" id="apply-transaction-filter">กรอง</button>
                     </div>
-                    <button class="btn" id="generate-report-btn">สร้างรายงาน</button>
-                </div>
 
-                <div class="chart-container">
-                    <h3>รายจ่ายตามหมวดหมู่ (Pie Chart)</h3>
-                    <canvas id="expense-pie-chart"></canvas>
+                    <h3>รายการธุรกรรม</h3>
+                    <div style="overflow-x: auto;">
+                        <table id="transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>ประเภท</th>
+                                    <th>หมวดหมู่</th>
+                                    <th>รายละเอียด</th>
+                                    <th>จำนวน</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Transactions will be loaded here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </section>
 
-                <div class="chart-container">
-                    <h3>แนวโน้มรายรับ-รายจ่าย (Line Chart)</h3>
-                    <canvas id="income-expense-line-chart"></canvas>
+            <!-- Categories Section -->
+            <section id="categories-section" class="content-section">
+                <h2 class="header">จัดการหมวดหมู่</h2>
+                <div class="app-card">
+                    <button class="btn" id="add-category-btn"><i class="fas fa-tags"></i> เพิ่มหมวดหมู่ใหม่</button>
+                    <h3>รายการหมวดหมู่</h3>
+                    <div style="overflow-x: auto;">
+                        <table id="categories-table">
+                            <thead>
+                                <tr>
+                                    <th>ชื่อหมวดหมู่</th>
+                                    <th>ไอคอน</th>
+                                    <th>สี</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Categories will be loaded here by JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </section>
 
-                <div class="report-actions">
-                    <button class="btn" id="export-pdf-btn"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                    <button class="btn" id="export-excel-btn"><i class="fas fa-file-excel"></i> Export Excel</button>
+            <!-- Reports Section -->
+            <section id="reports-section" class="content-section">
+                <h2 class="header">รายงานและแผนภูมิ</h2>
+                <div class="app-card">
+                    <div class="report-filters">
+                        <div class="form-group">
+                            <label for="report-period-type">ประเภทรายงาน</label>
+                            <select id="report-period-type">
+                                <option value="monthly">รายเดือน</option>
+                                <option value="yearly">รายปี</option>
+                                <option value="custom">กำหนดเอง</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="report-month-year-group">
+                            <label for="report-month-year">เดือน/ปี</label>
+                            <input type="month" id="report-month-year">
+                        </div>
+                        <div class="form-group" id="report-year-group" style="display: none;">
+                            <label for="report-year">ปี</label>
+                            <input type="number" id="report-year" min="2000" max="2100" value="2024">
+                        </div>
+                        <div class="form-group" id="report-custom-date-group" style="display: none;">
+                            <label for="report-start-date">จากวันที่</label>
+                            <input type="date" id="report-start-date">
+                            <label for="report-end-date">ถึงวันที่</label>
+                            <input type="date" id="report-end-date">
+                        </div>
+                        <button class="btn" id="generate-report-btn">สร้างรายงาน</button>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>รายจ่ายตามหมวดหมู่ (Pie Chart)</h3>
+                        <canvas id="expense-pie-chart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>แนวโน้มรายรับ-รายจ่าย (Line Chart)</h3>
+                        <canvas id="income-expense-line-chart"></canvas>
+                    </div>
+
+                    <div class="report-actions">
+                        <button class="btn" id="export-pdf-btn"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                        <button class="btn" id="export-excel-btn"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
     <!-- Modals -->
@@ -836,8 +969,10 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { getDatabase, ref, push, set, remove, onValue } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-        // Your web app's Firebase configuration - UPDATED WITH databaseURL
+
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA_hMtH-ZZvPHc8rGIau9NcjmMBuuCMkLg",
             authDomain: "gptai-d5dcb.firebaseapp.com",
@@ -851,12 +986,28 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        const transactionsRef = ref(database, 'transactions');
-        const categoriesRef = ref(database, 'categories');
+        const auth = getAuth(app); // Initialize Firebase Auth
+
+        let currentUserId = null; // To store the current logged-in user's UID
 
         // --- UI Elements ---
         const navLinks = document.querySelectorAll('.navbar ul li a');
         const contentSections = document.querySelectorAll('.content-section');
+
+        // Authentication UI Elements
+        const authSection = document.getElementById('auth-section');
+        const mainAppContent = document.getElementById('main-app-content');
+        const authModeTitle = document.getElementById('auth-mode-title');
+        const authForm = document.getElementById('auth-form');
+        const authEmailInput = document.getElementById('auth-email');
+        const authPasswordInput = document.getElementById('auth-password');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const toggleAuthModeBtn = document.getElementById('toggle-auth-mode-btn');
+        const userStatusDiv = document.getElementById('user-status');
+        const authStatusText = document.getElementById('auth-status-text');
+        const authButton = document.getElementById('auth-button'); // This button will toggle login/logout
+
+        let isLoginMode = true; // State to track if form is for login or register
 
         // Dashboard Elements
         const balanceAmount = document.getElementById('balance-amount');
@@ -936,6 +1087,121 @@
             document.getElementById(modalId).style.display = 'block';
         }
 
+        // --- Authentication Logic ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                currentUserId = user.uid;
+                authStatusText.textContent = `เข้าสู่ระบบ: ${user.email}`;
+                userStatusDiv.classList.remove('logged-out');
+                userStatusDiv.classList.add('logged-in');
+                authButton.textContent = 'ออกจากระบบ';
+                
+                authSection.classList.remove('active'); // Hide auth section
+                mainAppContent.classList.add('active'); // Show main app content
+
+                showNotification('เข้าสู่ระบบสำเร็จ!', 'success', 2000);
+                // Load data for the logged-in user
+                loadCategories(); // This will also trigger loadTransactions
+                updateDashboard(); // Ensure dashboard is updated on login
+                // Set default active navigation tab to dashboard
+                navLinks.forEach(nav => nav.classList.remove('active'));
+                document.querySelector('[data-section="dashboard"]').classList.add('active');
+                document.getElementById('dashboard-section').classList.add('active');
+
+            } else {
+                // User is signed out
+                currentUserId = null;
+                authStatusText.textContent = 'ไม่ได้เข้าสู่ระบบ';
+                userStatusDiv.classList.remove('logged-in');
+                userStatusDiv.classList.add('logged-out');
+                authButton.textContent = 'เข้าสู่ระบบ';
+
+                authSection.classList.add('active'); // Show auth section
+                mainAppContent.classList.remove('active'); // Hide main app content
+                showNotification('ออกจากระบบแล้ว', 'info', 2000);
+            }
+        });
+
+        authButton.addEventListener('click', () => {
+            if (currentUserId) {
+                // If logged in, sign out
+                signOut(auth).catch((error) => {
+                    showNotification(`ข้อผิดพลาดในการออกจากระบบ: ${error.message}`, 'error', 5000);
+                    console.error("Sign out error:", error);
+                });
+            } else {
+                // If logged out, show login form
+                authSection.classList.add('active');
+                mainAppContent.classList.remove('active');
+                authModeTitle.textContent = 'เข้าสู่ระบบ';
+                authForm.reset();
+                isLoginMode = true;
+                toggleAuthModeBtn.textContent = 'ยังไม่มีบัญชี? ลงทะเบียนที่นี่';
+            }
+        });
+
+        toggleAuthModeBtn.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authModeTitle.textContent = 'เข้าสู่ระบบ';
+                authSubmitBtn.textContent = 'เข้าสู่ระบบ';
+                toggleAuthModeBtn.textContent = 'ยังไม่มีบัญชี? ลงทะเบียนที่นี่';
+            } else {
+                authModeTitle.textContent = 'ลงทะเบียน';
+                authSubmitBtn.textContent = 'ลงทะเบียน';
+                toggleAuthModeBtn.textContent = 'มีบัญชีอยู่แล้ว? เข้าสู่ระบบที่นี่';
+            }
+            authForm.reset(); // Clear form on mode switch
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+
+            authSubmitBtn.disabled = true;
+            authSubmitBtn.textContent = "กำลังดำเนินการ...";
+
+            try {
+                if (isLoginMode) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    // onAuthStateChanged will handle UI update
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    // onAuthStateChanged will handle UI update
+                }
+            } catch (error) {
+                let errorMessage = "เกิดข้อผิดพลาด";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'อีเมลนี้ถูกใช้แล้ว';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'รูปแบบอีเมลไม่ถูกต้อง';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+                        break;
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                        errorMessage = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMessage = 'พยายามหลายครั้งเกินไป โปรดลองใหม่ในภายหลัง';
+                        break;
+                    default:
+                        errorMessage = `ข้อผิดพลาด: ${error.message}`;
+                }
+                showNotification(errorMessage, 'error', 7000);
+                console.error("Auth error:", error);
+            } finally {
+                authSubmitBtn.disabled = false;
+                authSubmitBtn.textContent = isLoginMode ? 'เข้าสู่ระบบ' : 'ลงทะเบียน';
+            }
+        });
+
+
         // --- Navigation ---
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
@@ -956,7 +1222,7 @@
                 // Hide all content sections
                 contentSections.forEach(section => {
                     section.classList.remove('active');
-                    showNotification(`ซ่อนส่วน: ${section.id}`, 'info', 1000);
+                    // showNotification(`ซ่อนส่วน: ${section.id}`, 'info', 1000); // Too verbose for regular use
                 });
                 // Show the target section
                 const targetSection = document.getElementById(targetSectionId);
@@ -983,6 +1249,8 @@
 
         // --- Dashboard Logic ---
         function updateDashboard() {
+            if (!currentUserId) return; // Only update if logged in
+
             let totalBalance = 0;
             let currentMonthIncome = 0;
             let currentMonthExpense = 0;
@@ -1016,6 +1284,10 @@
 
         // --- Transaction Logic ---
         addTransactionBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบก่อนเพิ่มธุรกรรม', 'warning', 3000);
+                return;
+            }
             transactionModalTitle.textContent = 'เพิ่มธุรกรรมใหม่';
             transactionIdInput.value = '';
             transactionForm.reset();
@@ -1024,6 +1296,10 @@
         });
 
         quickAddTransactionBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบก่อนเพิ่มธุรกรรม', 'warning', 3000);
+                return;
+            }
             transactionModalTitle.textContent = 'เพิ่มธุรกรรมใหม่';
             transactionIdInput.value = '';
             transactionForm.reset();
@@ -1033,6 +1309,10 @@
 
         transactionForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบก่อนบันทึกธุรกรรม', 'error', 3000);
+                return;
+            }
 
             const id = transactionIdInput.value;
             const type = document.querySelector('input[name="type"]:checked').value;
@@ -1041,9 +1321,12 @@
             const date = dateInput.value;
             const description = descriptionInput.value;
 
+            // Important: Data will now be saved under the user's UID
+            const userTransactionsRef = ref(database, `transactions/${currentUserId}`);
+
             if (id) {
                 // Update existing transaction
-                set(ref(database, `transactions/${id}`), { type, amount, category, date, description })
+                set(ref(database, `transactions/${currentUserId}/${id}`), { type, amount, category, date, description })
                     .then(() => {
                         showNotification('ธุรกรรมอัปเดตเรียบร้อย!', 'success');
                         closeModal('transaction-modal');
@@ -1054,7 +1337,7 @@
                     });
             } else {
                 // Add new transaction
-                push(transactionsRef, { type, amount, category, date, description })
+                push(userTransactionsRef, { type, amount, category, date, description })
                     .then(() => {
                         showNotification('เพิ่มธุรกรรมเรียบร้อย!', 'success');
                         closeModal('transaction-modal');
@@ -1067,7 +1350,14 @@
         });
 
         function loadTransactions() {
-            onValue(transactionsRef, (snapshot) => {
+            if (!currentUserId) {
+                transactionsTableBody.innerHTML = '<tr><td colspan="6">กรุณาเข้าสู่ระบบเพื่อดูธุรกรรม</td></tr>';
+                allTransactions = {};
+                return;
+            }
+            // Listen to transactions specific to the current user
+            const userTransactionsRef = ref(database, `transactions/${currentUserId}`);
+            onValue(userTransactionsRef, (snapshot) => {
                 allTransactions = snapshot.val() || {};
                 renderTransactionsTable(allTransactions);
                 updateDashboard();
@@ -1080,6 +1370,10 @@
 
         function renderTransactionsTable(transactionsToRender) {
             transactionsTableBody.innerHTML = '';
+            if (Object.keys(transactionsToRender).length === 0) {
+                transactionsTableBody.innerHTML = '<tr><td colspan="6">ยังไม่มีธุรกรรม</td></tr>';
+                return;
+            }
             const sortedTransactions = Object.entries(transactionsToRender || {}).sort(([, a], [, b]) => new Date(b.date) - new Date(a.date));
 
             sortedTransactions.forEach(([id, transaction]) => {
@@ -1108,6 +1402,10 @@
         }
 
         function editTransaction(id) {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อแก้ไขธุรกรรม', 'warning', 3000);
+                return;
+            }
             const transaction = allTransactions[id];
             if (transaction) {
                 transactionModalTitle.textContent = 'แก้ไขธุรกรรม';
@@ -1122,9 +1420,13 @@
         }
 
         function deleteTransaction(id) {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อลบธุรกรรม', 'warning', 3000);
+                return;
+            }
             const confirmDelete = window.confirm('คุณแน่ใจหรือไม่ที่จะลบธุรกรรมนี้?');
             if (confirmDelete) {
-                remove(ref(database, `transactions/${id}`))
+                remove(ref(database, `transactions/${currentUserId}/${id}`))
                     .then(() => {
                         showNotification('ธุรกรรมถูกลบเรียบร้อย!', 'success');
                     })
@@ -1136,6 +1438,10 @@
         }
 
         applyTransactionFilterBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อกรองธุรกรรม', 'warning', 3000);
+                return;
+            }
             filterTransactions();
         });
 
@@ -1173,6 +1479,10 @@
 
         // --- Category Logic ---
         addCategoryBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบก่อนเพิ่มหมวดหมู่', 'warning', 3000);
+                return;
+            }
             categoryModalTitle.textContent = 'เพิ่มหมวดหมู่ใหม่';
             categoryIdInput.value = '';
             categoryForm.reset();
@@ -1183,6 +1493,10 @@
 
         categoryForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบก่อนบันทึกหมวดหมู่', 'error', 3000);
+                return;
+            }
             showNotification('ขั้นตอน 1: ฟอร์มถูกส่ง, กำลังประมวลผล...', 'info', 3000);
 
             const id = categoryIdInput.value;
@@ -1200,9 +1514,12 @@
             submitBtn.textContent = "กำลังบันทึก...";
             showNotification('ขั้นตอน 3: กำลังพยายามบันทึกไปยัง Firebase...', 'info', 5000);
 
+            // Important: Data will now be saved under the user's UID
+            const userCategoriesRef = ref(database, `categories/${currentUserId}`);
+
             if (id) {
                 // Update existing category
-                set(ref(database, `categories/${id}`), { name, icon, color })
+                set(ref(database, `categories/${currentUserId}/${id}`), { name, icon, color })
                     .then(() => {
                         showNotification('ขั้นตอน 4: หมวดหมู่อัปเดตเรียบร้อย! (Firebase OK)', 'success', 7000);
                         closeModal('category-modal');
@@ -1219,7 +1536,7 @@
                     });
             } else {
                 // Add new category
-                push(categoriesRef, { name, icon, color })
+                push(userCategoriesRef, { name, icon, color })
                     .then(() => {
                         showNotification('ขั้นตอน 4: เพิ่มหมวดหมู่เรียบร้อย! (Firebase OK)', 'success', 7000);
                         closeModal('category-modal');
@@ -1238,12 +1555,21 @@
         });
 
         function loadCategories() {
-            onValue(categoriesRef, (snapshot) => {
+            if (!currentUserId) {
+                categoriesTableBody.innerHTML = '<tr><td colspan="4">กรุณาเข้าสู่ระบบเพื่อดูหมวดหมู่</td></tr>';
+                categorySelect.innerHTML = '<option value="">กรุณาเข้าสู่ระบบ</option>';
+                filterCategorySelect.innerHTML = '<option value="">กรุณาเข้าสู่ระบบ</option>';
+                allCategories = {};
+                return;
+            }
+            // Listen to categories specific to the current user
+            const userCategoriesRef = ref(database, `categories/${currentUserId}`);
+            onValue(userCategoriesRef, (snapshot) => {
                 allCategories = snapshot.val() || {};
                 console.log("Categories loaded:", allCategories);
                 renderCategoriesTable(allCategories);
                 populateCategoryDropdowns();
-                loadTransactions();
+                loadTransactions(); // Reload transactions after categories are loaded
             }, (error) => {
                 showNotification(`ข้อผิดพลาดในการโหลดหมวดหมู่: ${error.message}`, 'error');
                 console.error("Error loading categories:", error);
@@ -1252,6 +1578,10 @@
 
         function renderCategoriesTable(categoriesToRender) {
             categoriesTableBody.innerHTML = '';
+            if (Object.keys(categoriesToRender).length === 0) {
+                categoriesTableBody.innerHTML = '<tr><td colspan="4">ยังไม่มีหมวดหมู่</td></tr>';
+                return;
+            }
             Object.entries(categoriesToRender).forEach(([id, category]) => {
                 const row = categoriesTableBody.insertRow();
                 row.innerHTML = `
@@ -1267,6 +1597,10 @@
         }
 
         function editCategory(id) {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อแก้ไขหมวดหมู่', 'warning', 3000);
+                return;
+            }
             const category = allCategories[id];
             if (category) {
                 categoryModalTitle.textContent = 'แก้ไขหมวดหมู่';
@@ -1279,6 +1613,10 @@
         }
 
         function deleteCategory(id) {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อลบหมวดหมู่', 'warning', 3000);
+                return;
+            }
             const hasTransactions = Object.values(allTransactions).some(trans => trans.category === id);
             if (hasTransactions) {
                 showNotification('ไม่สามารถลบหมวดหมู่นี้ได้เนื่องจากมีธุรกรรมที่ใช้หมวดหมู่นี้อยู่', 'error', 5000);
@@ -1287,7 +1625,7 @@
 
             const confirmDelete = window.confirm('คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่นี้?');
             if (confirmDelete) {
-                remove(ref(database, `categories/${id}`))
+                remove(ref(database, `categories/${currentUserId}/${id}`))
                     .then(() => {
                         showNotification('หมวดหมู่ถูกลบเรียบร้อย!', 'success');
                         console.log("Category deleted successfully!");
@@ -1337,6 +1675,10 @@
         generateReportBtn.addEventListener('click', generateReport);
 
         function getFilteredTransactionsForReport() {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อสร้างรายงาน', 'warning', 3000);
+                return [];
+            }
             let filteredTransactions = Object.values(allTransactions);
             const reportType = reportPeriodTypeSelect.value;
 
@@ -1368,6 +1710,13 @@
 
 
         function generateReport() {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อสร้างรายงาน', 'warning', 3000);
+                // Clear charts if not logged in
+                if (expensePieChart) expensePieChart.destroy();
+                if (incomeExpenseLineChart) incomeExpenseLineChart.destroy();
+                return;
+            }
             const transactions = getFilteredTransactionsForReport();
 
             // Pie Chart: Expense by Category
@@ -1525,6 +1874,10 @@
 
         // --- Export Functions ---
         exportPdfBtn.addEventListener('click', async () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อ Export PDF', 'warning', 3000);
+                return;
+            }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -1584,6 +1937,10 @@
         });
 
         exportExcelBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showNotification('กรุณาเข้าสู่ระบบเพื่อ Export Excel', 'warning', 3000);
+                return;
+            }
             const transactions = getFilteredTransactionsForReport();
 
             const ws_data = [
@@ -1610,6 +1967,7 @@
 
         // --- Daily Reminder (Basic In-App) ---
         function checkDailyReminder() {
+            if (!currentUserId) return; // Only show reminder if logged in
             const lastReminderDate = localStorage.getItem('lastReminderDate');
             const today = new Date().toISOString().slice(0, 10);
 
@@ -1629,9 +1987,14 @@
             reportMonthYearInput.value = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
             reportYearInput.value = today.getFullYear();
 
-            loadCategories();
+            // Initial state: show auth section, hide main app content
+            authSection.classList.add('active');
+            mainAppContent.classList.remove('active');
 
-            document.getElementById('dashboard-section').classList.add('active');
+            // onAuthStateChanged will handle loading data and showing main content after login
+            // For now, just ensure UI is ready
+            // loadCategories(); // This will be called by onAuthStateChanged
+            // document.getElementById('dashboard-section').classList.add('active'); // This will be handled by onAuthStateChanged
 
             setTimeout(checkDailyReminder, 5000);
             setInterval(checkDailyReminder, 3600000);
@@ -1649,6 +2012,8 @@
         let monthlyBudget = 10000;
 
         function checkBudget() {
+            if (!currentUserId) return; // Only check budget if logged in
+
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth();
@@ -1670,10 +2035,10 @@
             }
         }
 
-        onValue(transactionsRef, () => { // Use onValue from modular SDK
-            updateDashboard();
-            checkBudget();
-        });
+        // onValue(transactionsRef, () => { // This will now be handled inside loadTransactions
+        //     updateDashboard();
+        //     checkBudget();
+        // });
 
     </script>
 </body>
